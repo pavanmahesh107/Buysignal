@@ -50,8 +50,8 @@ jobs:
           username: ${{ secrets.GMAIL_USERNAME }}
           password: ${{ secrets.GMAIL_APP_PASSWORD }}
           subject: "🚨 Dashboard Update Failed!"
-          to: your-email@gmail.com
-          from: BuySignal Bot <your-email@gmail.com>
+          to: pavanmahesh107@gmail.com
+          from: BuySignal Bot <pavanmahesh107@gmail.com>
           body: |
             Hello!
 
