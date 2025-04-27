@@ -61,7 +61,8 @@ def generate_dashboard(signals):
         summary = signal.get("summary", "")
         tags = ", ".join(signal.get("tags", []))
         source = signal.get("source", "")
-        created = datetime.strptime(signal.get("created_utc"), "%Y-%m-%dT%H:%M:%S").strftime("%Y-%m-%d %H:%M")
+        created = datetime.fromisoformat(signal.get("created_utc").replace('Z', '+00:00')).strftime("%Y-%m-%d %H:%M")
+
 
         html += f"""
         <tr>
