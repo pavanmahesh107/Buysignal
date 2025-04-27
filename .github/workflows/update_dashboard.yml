@@ -1,0 +1,71 @@
+name: Update Dashboard Daily
+
+on:
+  schedule:
+    - cron: "0 3 * * *"  # Runs daily at 3 AM UTC
+  workflow_dispatch:
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          pip install requests
+
+      - name: Generate Dashboard
+        run: |
+          python dashboard_generator.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Commit Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add dashboard.html
+          git commit -m "🆕 Auto-update dashboard [skip ci]" || echo "⚠️ No changes to commit, skipping..."
+          git push
+        continue-on-error: true  # Don't crash if no file change happens
+
+  notify-on-failure:
+    if: failure()
+    runs-on: ubuntu-latest
+    needs: update-dashboard
+    steps:
+      - name: Send Failure Notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.GMAIL_USERNAME }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          subject: "🚨 Dashboard Update Failed!"
+          to: your-email@gmail.com
+          from: BuySignal Bot <your-email@gmail.com>
+          body: |
+            Hello!
+
+            Your Reddit Buying Intent Dashboard Auto-Update failed ❌.
+
+            Possible reasons:
+            - Supabase is down
+            - Supabase keys expired
+            - Network timeout
+            - GitHub permissions issue
+            - Scraping issue (no posts / API limit)
+
+            Please check the GitHub Action logs here:
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            -- 
+            BuySignal AI Bot 🤖
