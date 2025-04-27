@@ -28,21 +28,23 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
-      - name: Commit Changes
+      - name: Commit and Push Dashboard
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add dashboard.html
-          git commit -m "🆕 Auto-update dashboard [skip ci]" || echo "⚠️ No changes to commit, skipping..."
-          git push
-        continue-on-error: true  # Don't crash if no file change happens
+          git add index.html
+          git commit -m "📈 Update dashboard [skip ci]" || echo "⚠️ No changes to commit"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true  # Prevent crash if no file change
 
   notify-on-failure:
     if: failure()
     runs-on: ubuntu-latest
     needs: update-dashboard
     steps:
-      - name: Send Failure Notification
+      - name: Send Failure Notification Email
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -67,5 +69,5 @@ jobs:
             Please check the GitHub Action logs here:
             https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-            -- 
+            --
             BuySignal AI Bot 🤖
