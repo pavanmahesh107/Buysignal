@@ -2,8 +2,11 @@ name: Update Dashboard Daily
 
 on:
   schedule:
-    - cron: "0 3 * * *"  # Runs daily at 3 AM UTC
+    - cron: "0 4 * * *"  # Runs daily at 4 AM UTC
   workflow_dispatch:
+  
+permissions:
+  contents: write  ✅ This line is mandatory to allow push commits  
 
 jobs:
   update-dashboard:
