@@ -11,9 +11,15 @@ def fetch_signals():
         "apikey": SUPABASE_ANON_KEY,
         "Authorization": f"Bearer {SUPABASE_ANON_KEY}"
     }
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    return response.json()
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        signals = response.json()
+        print(f"✅ Successfully fetched {len(signals)} signals.")
+        return signals
+    except Exception as e:
+        print(f"❌ Failed to fetch signals: {e}")
+        return []
 
 def generate_dashboard(signals):
     now = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
@@ -54,24 +60,30 @@ def generate_dashboard(signals):
       <tbody>
     """
 
-    for signal in signals:
-        title = signal.get("title", "No Title")
-        permalink = signal.get("permalink", "#")
-        intent = signal.get("intent_type", "Unknown")
-        summary = signal.get("summary", "")
-        tags = ", ".join(signal.get("tags", []))
-        source = signal.get("source", "")
-        created = datetime.fromisoformat(signal.get("created_utc").replace('Z', '+00:00')).strftime("%Y-%m-%d %H:%M")
+    if signals:
+        for signal in signals:
+            title = signal.get("title", "No Title")
+            permalink = signal.get("permalink", "#")
+            intent = signal.get("intent_type", "Unknown")
+            summary = signal.get("summary", "")
+            tags = ", ".join(signal.get("tags", []))
+            source = signal.get("source", "")
+            created = datetime.fromisoformat(signal.get("created_utc").replace('Z', '+00:00')).strftime("%Y-%m-%d %H:%M")
 
-
-        html += f"""
+            html += f"""
+            <tr>
+              <td><a href="{permalink}" target="_blank">{title}</a></td>
+              <td>{intent}</td>
+              <td>{summary}</td>
+              <td>{tags}</td>
+              <td>{source}</td>
+              <td>{created}</td>
+            </tr>
+            """
+    else:
+        html += """
         <tr>
-          <td><a href="{permalink}" target="_blank">{title}</a></td>
-          <td>{intent}</td>
-          <td>{summary}</td>
-          <td>{tags}</td>
-          <td>{source}</td>
-          <td>{created}</td>
+          <td colspan="6" style="text-align:center;">⚠️ No signals available. Please check back later!</td>
         </tr>
         """
 
@@ -83,8 +95,9 @@ def generate_dashboard(signals):
     </html>
     """
 
-    with open("dashboard.html", "w", encoding="utf-8") as f:
+    with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
+    print("✅ Dashboard generated successfully (index.html).")
 
 if __name__ == "__main__":
     signals = fetch_signals()
