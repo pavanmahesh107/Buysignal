@@ -11,6 +11,13 @@ def fetch_signals():
         "apikey": SUPABASE_ANON_KEY,
         "Authorization": f"Bearer {SUPABASE_ANON_KEY}"
     }
+     print(f"📡 Fetching from: {url}")
+    response = requests.get(url, headers=headers)
+    print(f"📡 Status Code: {response.status_code}")
+    print(f"📡 Response Text (partial): {response.text[:500]}")
+    response.raise_for_status()
+    return response.json()
+    
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()

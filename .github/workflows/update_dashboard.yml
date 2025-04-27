@@ -4,9 +4,9 @@ on:
   schedule:
     - cron: "0 4 * * *"  # Runs daily at 4 AM UTC
   workflow_dispatch:
-  
+
 permissions:
-  contents: write  ✅ This line is mandatory to allow push commits  
+  contents: write  # ✅ Mandatory to allow git push from Actions
 
 jobs:
   update-dashboard:
@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true  # ✅ Important to allow git push using GITHUB_TOKEN
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -40,7 +42,7 @@ jobs:
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: true  # Prevent crash if no file change
+        continue-on-error: true  # ✅ Don't crash even if nothing new to push
 
   notify-on-failure:
     if: failure()
